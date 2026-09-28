@@ -90,7 +90,8 @@ export default function GameApp() {
   }, [toast]);
 
   const header = (
-    <Header progress={progress} update={update} dark={dark} onHome={() => setScreen({ name: "map" })}
+    <Header progress={progress} update={update} dark={dark} onHome={() => setScreen({ name: "landing" })} onMap={() => setScreen({ name: "map" })}
+      active={screen.name === "landing" ? "home" : screen.name === "map" ? "map" : "other"}
       onReset={() => { clearProgress(); const fresh = { ...defaultProgress(), settings: progress.settings }; setProgress(fresh); saveProgress(fresh); setScreen({ name: "map" }); }} onHelp={() => setGuide(true)} />
   );
   const guideModal = guide ? <GuideModal onClose={() => setGuide(false)} /> : null;

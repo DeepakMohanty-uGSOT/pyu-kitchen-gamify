@@ -8,7 +8,7 @@ export const CHAPTERS: Chapter[] = [
     example: "rice = 5" },
   { id: 2, title: "What's in the Jar", plainTitle: "Kinds of values", concept: "Data types", area: "Pantry", accent: "#0d9488", icon: "🏷️",
     blurb: "Some jars hold whole numbers, some decimals, some words, some a yes/no switch.",
-    simple: "Python treats whole numbers, decimal numbers, text and True/False differently. Learn to tell them apart and change one into another.",
+    simple: "Numbers, decimals, words and True/False are different kinds of values. Learn to tell them apart and switch between them.",
     example: "sugar = 2.5\ndish = \"soup\"" },
   { id: 3, title: "The Scales Counter", plainTitle: "Do maths and compare", concept: "Operators", area: "Scales Counter", accent: "#0284c7", icon: "⚖️",
     blurb: "Weigh, add, split and compare ingredients.",

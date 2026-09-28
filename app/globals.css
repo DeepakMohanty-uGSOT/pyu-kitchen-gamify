@@ -64,6 +64,7 @@ body {
 .font-display { font-family: var(--font-display); }
 .font-hand { font-family: var(--font-hand); }
 
+@layer components {
 .panel {
   background: var(--panel);
   border: 1px solid var(--line);
@@ -113,6 +114,7 @@ code.inline {
   border-radius: 0.35rem;
   padding: 0.05rem 0.3rem;
   white-space: pre-wrap;
+}
 }
 
 /* ---------- Glass jars ---------- */

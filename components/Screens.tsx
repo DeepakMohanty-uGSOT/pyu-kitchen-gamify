@@ -5,6 +5,7 @@ import { Fragment, useEffect, useState } from "react";
 import { CHAPTERS, LEVELS, levelsOf, rankFor, RANKS, TOTAL_POINTS } from "@/lib/levels";
 import { chapterComplete, chapterPoints, chapterUnlocked, levelUnlocked, totalPoints, type Progress } from "@/lib/progress";
 import { Byte, CustomerFigure, Logo, Pyu } from "./kitchen/Characters";
+import HeroDemo from "./HeroDemo";
 
 type RunnerState = { status: string; error: string };
 
@@ -329,30 +330,52 @@ export function Landing({ runner, onStart, onRetry, hasProgress }: { runner: Run
     <button className="btn btn-primary px-8 py-3 text-lg" style={{ ["--accent" as string]: "#d97706" }} onClick={onStart}>{label}</button>
   );
   return (
-    <div className="mx-auto flex max-w-6xl flex-col gap-16 px-1 py-8 sm:px-4 sm:py-12">
+    <div className="mx-auto flex max-w-6xl flex-col gap-16 px-1 pb-8 pt-4 sm:px-4 sm:pb-12">
       {/* hero */}
-      <section className="relative flex flex-col items-center gap-5 text-center">
-        <div className="pointer-events-none absolute inset-0 -z-10 opacity-60" style={{ background: "radial-gradient(ellipse at 50% 30%, color-mix(in srgb, #f59e0b 30%, transparent), transparent 60%)" }} />
-        <div className="flex items-end justify-center gap-2">
-          <div className="w-[150px] sm:w-[190px]"><Pyu mood="happy" size={190} /></div>
-          <div className="mb-4"><Byte size={64} talking /></div>
-        </div>
-        <div>
-          <h1 className="flex items-center justify-center gap-3 font-display text-4xl font-bold tracking-tight sm:text-6xl"><Logo size={52} /> Pyu&apos;s Kitchen</h1>
-          <p className="mt-2 font-display text-lg opacity-85 sm:text-xl">Learn Python from zero by cooking with Chef Pyu.</p>
-        </div>
-        <p className="max-w-2xl text-[15.5px] leading-relaxed opacity-90">
-          Chef Pyu follows instructions <b>exactly</b>, step by step, just like a computer. You write those instructions in <b>real Python</b>, press <b>Cook</b>, and watch the kitchen do exactly what your code says.
-        </p>
-        <div className="flex flex-col items-center gap-2 sm:flex-row sm:gap-3">
-          {cta(hasProgress ? "Continue cooking →" : "Start cooking →")}
-          <a href="#how-it-works" className="btn px-5 py-3">👀 See how it works</a>
-        </div>
-        {status}
-        <div className="flex flex-wrap justify-center gap-2 text-[13px]">
-          {["🆓 Free", "🧑‍🎓 For total beginners", "💻 Nothing to install", "🐍 Real Python", `🎮 ${LEVELS.length} short levels`].map((t) => (
-            <span key={t} className="rounded-full border px-3 py-1" style={{ borderColor: "var(--line)", background: "var(--panel)" }}>{t}</span>
+      <section className="relative -mx-2 overflow-hidden rounded-[2rem] px-4 py-10 sm:-mx-4 sm:px-8 sm:py-14 lg:py-16">
+        {/* background: warm glow, dotted grid and floating ingredients */}
+        <div className="pointer-events-none absolute inset-0 -z-10" aria-hidden>
+          <div className="absolute -left-24 -top-24 h-80 w-80 rounded-full bg-amber-500/25 blur-3xl" />
+          <div className="absolute -right-20 top-10 h-72 w-72 rounded-full bg-rose-500/20 blur-3xl" />
+          <div className="absolute bottom-0 left-1/3 h-64 w-64 rounded-full bg-emerald-500/15 blur-3xl" />
+          <div className="absolute inset-0 opacity-[0.35]" style={{ backgroundImage: "radial-gradient(color-mix(in srgb, var(--ink) 18%, transparent) 1px, transparent 1px)", backgroundSize: "22px 22px" }} />
+          {[["🍅", "6%", "18%", 0], ["🥕", "44%", "8%", 0.8], ["🧅", "90%", "12%", 1.6], ["🌶️", "4%", "78%", 2.2], ["🥚", "52%", "90%", 1.1], ["🧂", "94%", "70%", 0.4], ["🍋", "30%", "60%", 2.8]].map(([e, x, y, d]) => (
+            <span key={e as string} className="anim-float absolute text-2xl opacity-40 sm:text-3xl" style={{ left: x as string, top: y as string, animationDelay: `${d}s`, animationDuration: "5s" }}>{e as string}</span>
           ))}
+        </div>
+
+        <div className="grid items-center gap-10 lg:grid-cols-[1.05fr_1fr] lg:gap-12">
+          {/* text */}
+          <div className="flex flex-col items-center gap-5 text-center lg:items-start lg:text-left">
+            <span className="anim-fadeup inline-flex items-center gap-2 rounded-full border px-3 py-1 text-[13px] font-semibold shadow-sm" style={{ borderColor: "color-mix(in srgb, #f59e0b 50%, var(--line))", background: "var(--panel)" }}>
+              <Logo size={20} /> Game 1 · Python for complete beginners
+            </span>
+            <h1 className="anim-fadeup font-display text-[2.6rem] font-bold leading-[1.05] tracking-tight sm:text-6xl lg:text-[4.1rem]" style={{ animationDelay: ".08s" }}>
+              Learn Python by{" "}
+              <span className="bg-gradient-to-r from-amber-500 via-orange-500 to-rose-500 bg-clip-text text-transparent">cooking with Chef&nbsp;Pyu</span>
+            </h1>
+            <p className="anim-fadeup max-w-xl text-[16.5px] leading-relaxed opacity-90" style={{ animationDelay: ".16s" }}>
+              Pyu the snake chef follows your instructions <b>exactly</b>, just like a computer. Write a few lines of <b>real Python</b>, press <b>Cook</b>, and watch the kitchen bring your code to life.
+            </p>
+            <div className="anim-fadeup flex flex-col items-center gap-2.5 sm:flex-row" style={{ animationDelay: ".24s" }}>
+              {cta(hasProgress ? "Continue cooking →" : "Start cooking, it's free →")}
+              <a href="#how-it-works" className="btn px-5 py-3">👀 See how it works</a>
+            </div>
+            <div className="anim-fadeup" style={{ animationDelay: ".3s" }}>{status}</div>
+            <div className="anim-fadeup grid w-full max-w-md grid-cols-3 gap-2" style={{ animationDelay: ".36s" }}>
+              {[["9", "chapters"], [String(LEVELS.length), "short levels"], ["0", "setup needed"]].map(([n, l]) => (
+                <div key={l} className="rounded-2xl border px-2 py-2.5 text-center" style={{ borderColor: "var(--line)", background: "var(--panel)" }}>
+                  <div className="font-display text-2xl font-bold text-amber-600 dark:text-amber-400">{n}</div>
+                  <div className="text-[12px] opacity-75">{l}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* live demo */}
+          <div className="anim-fadeup pt-8 sm:pt-10 lg:pt-0" style={{ animationDelay: ".2s" }}>
+            <HeroDemo />
+          </div>
         </div>
       </section>
 

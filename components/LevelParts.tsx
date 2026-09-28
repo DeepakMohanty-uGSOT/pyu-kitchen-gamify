@@ -1,7 +1,7 @@
 "use client";
 
 import { ArrowRight, Lightbulb, RotateCcw } from "lucide-react";
-import type { Explained } from "@/lib/errors";
+import { errorMeaning, type Explained } from "@/lib/errors";
 import type { CustomerOutcome, LevelOutcome } from "@/lib/evaluate";
 import type { Frame, IoItem } from "@/lib/playback";
 import type { Level } from "@/lib/types";
@@ -73,7 +73,7 @@ export function ExecutionPanel({ frame, io, who, speaker, accident, idle, busy, 
     <div className="flex h-full flex-col gap-2">
       <div className="flex flex-wrap items-center gap-2 text-sm">
         <span className="rounded-md px-2 py-0.5 font-mono text-xs font-bold text-white" style={{ background: "var(--accent)" }}>
-          {busy ? "cooking…" : frame && frame.line > 0 ? `Line ${frame.line}` : frame?.done ? "Finished" : "Ready"}
+          {busy ? "cooking…" : frame && frame.line > 0 ? `Running line ${frame.line}` : frame?.done ? "Finished" : "Ready"}
         </span>
         {who && <span className="font-semibold opacity-80">{who}</span>}
         {step && <span className="ml-auto font-mono text-[11px] opacity-50">step {step.i + 1}/{step.n}</span>}
@@ -81,12 +81,12 @@ export function ExecutionPanel({ frame, io, who, speaker, accident, idle, busy, 
 
       {stack.length > 0 && (
         <div className="rounded-lg border border-emerald-500/40 bg-emerald-500/10 px-2 py-1 text-[13px]">
-          📜 Inside recipe card <b className="font-mono">{stack[stack.length - 1].fn}</b>
-          {stack.length > 1 && <span className="opacity-70"> (called from {stack.slice(0, -1).map((s) => s.fn).join(" → ")})</span>}
+          📜 Pyu is inside the recipe card (function) <b className="font-mono">{stack[stack.length - 1].fn}</b>
+          {stack.length > 1 && <span className="opacity-70"> (used from {stack.slice(0, -1).map((s) => s.fn).join(" → ")})</span>}
         </div>
       )}
-      {frame?.call && <div className="anim-fadeup text-[13px]">📥 Using card <b className="font-mono">{frame.call.fn}</b> with {Object.keys(frame.call.args).length ? Object.entries(frame.call.args).map(([k, v]) => `${k} = ${v.r}`).join(", ") : "no ingredients"}</div>}
-      {frame?.ret && !frame.ret.raised && <div className="anim-fadeup text-[13px]">🍽️ <b className="font-mono">{frame.ret.fn}</b> hands back <b className="font-mono">{frame.ret.value?.r ?? "None"}</b></div>}
+      {frame?.call && <div className="anim-fadeup text-[13px]">📥 Pyu uses the card <b className="font-mono">{frame.call.fn}</b> with {Object.keys(frame.call.args).length ? Object.entries(frame.call.args).map(([k, v]) => `${k} = ${v.r}`).join(", ") : "no ingredients"}</div>}
+      {frame?.ret && !frame.ret.raised && <div className="anim-fadeup text-[13px]">🍽️ <b className="font-mono">{frame.ret.fn}</b> gives back <b className="font-mono">{frame.ret.value?.r ?? "None"}</b></div>}
 
       {loops.map((lp, k) => (
         <div key={k} className="rounded-lg border px-2 py-1 text-[13px]" style={{ borderColor: "var(--line)", background: "var(--panel-2)" }}>
@@ -102,17 +102,17 @@ export function ExecutionPanel({ frame, io, who, speaker, accident, idle, busy, 
                 </div>
               )}
               {lp.header && lp.total !== undefined && lp.iter > lp.total ? (
-                <div>🔁 No items left → the loop ends</div>
+                <div>🔁 No items left, so the loop ends</div>
               ) : (
                 <div>
-                  🔁 Iteration <b>{lp.iter}</b>{lp.total !== undefined ? ` / ${lp.total}` : ""}
+                  🔁 Round <b>{lp.iter}</b>{lp.total !== undefined ? ` of ${lp.total}` : ""}
                   {lp.var && !lp.header && lp.value !== undefined && <> · <span className="font-mono">{lp.var} = {lp.value}</span></>}
-                  {lp.header && <span className="opacity-70"> · picking the next item…</span>}
+                  {lp.header && <span className="opacity-70"> · getting the next item…</span>}
                 </div>
               )}
             </>
           ) : (
-            <div>🔁 while-loop check #{lp.iter}</div>
+            <div>🔁 while loop: checking the question (check #{lp.iter})</div>
           )}
         </div>
       ))}
@@ -123,9 +123,9 @@ export function ExecutionPanel({ frame, io, who, speaker, accident, idle, busy, 
           <span className="opacity-70">{frame.cond.kind}</span> {frame.cond.text}{" "}
           {frame.cond.value !== undefined && (
             <b style={{ color: frame.cond.value ? "var(--good)" : "var(--bad)" }}>
-              → {frame.cond.value ? "✓ True" : "✗ False"}
+              → {frame.cond.value ? "✓ True (yes)" : "✗ False (no)"}
               <span className="font-sans font-normal opacity-80">
-                {frame.cond.kind === "while" ? (frame.cond.value ? " (repeat)" : " (stop)") : frame.cond.value ? " (do the indented steps)" : " (skip them)"}
+                {frame.cond.kind === "while" ? (frame.cond.value ? ", so repeat again" : ", so stop the loop") : frame.cond.value ? ", so run the indented lines" : ", so skip the indented lines"}
               </span>
             </b>
           )}
@@ -133,10 +133,10 @@ export function ExecutionPanel({ frame, io, who, speaker, accident, idle, busy, 
       )}
 
       <div className="flex min-h-[110px] flex-1 flex-col">
-        <div className="mb-1 text-[11px] font-bold uppercase tracking-wider opacity-60">Tickets &amp; orders</div>
+        <div className="mb-1 text-[11px] font-bold uppercase tracking-wider opacity-60">Printed output (tickets) &amp; answers</div>
         <div className="max-h-[220px] flex-1 space-y-1 overflow-y-auto rounded-lg border p-1.5 font-mono text-[13px]" style={{ borderColor: "var(--line)", background: "var(--panel-2)" }} aria-live="polite">
-          {idle && io.length === 0 && <div className="p-1 font-sans text-sm italic opacity-60">Press Cook to run your recipe. Printed tickets appear here.</div>}
-          {!idle && io.length === 0 && <div className="p-1 font-sans text-sm italic opacity-60">No tickets yet.</div>}
+          {idle && io.length === 0 && <div className="p-1 font-sans text-sm italic opacity-60">Press ▶ Cook to run your code. Anything your code prints shows up here as a ticket.</div>}
+          {!idle && io.length === 0 && <div className="p-1 font-sans text-sm italic opacity-60">Nothing printed yet.</div>}
           {io.map((it, j) =>
             it.kind === "print" ? (
               <div key={j} className={`${j === io.length - 1 ? "anim-ticket" : ""} rounded border border-stone-300 bg-[#fffef5] px-2 py-0.5 text-stone-800 shadow-sm`}>
@@ -145,7 +145,7 @@ export function ExecutionPanel({ frame, io, who, speaker, accident, idle, busy, 
             ) : (
               <div key={j} className="rounded border border-sky-400/50 bg-sky-500/10 px-2 py-0.5 font-sans">
                 {it.prompt && <div className="text-[12px] opacity-80">🐍 Pyu asks: <span className="font-mono">{it.prompt}</span></div>}
-                <div>🧑 {speaker} says: <b className="font-mono">&quot;{it.value}&quot;</b> <span className="text-[11px] opacity-60">(text)</span></div>
+                <div>🧑 {speaker} typed: <b className="font-mono">&quot;{it.value}&quot;</b> <span className="text-[11px] opacity-60">(arrives as text)</span></div>
               </div>
             ),
           )}
@@ -161,10 +161,11 @@ export function ErrorBox({ ex }: { ex: Explained }) {
   return (
     <div className="anim-fadeup rounded-xl border-2 border-red-400 bg-red-500/10 p-2.5" role="alert">
       <div className="font-display text-base font-semibold text-red-700 dark:text-red-300">{ex.emoji} {ex.title}</div>
-      <div className="mt-0.5 text-sm">{ex.explain}</div>
+      {errorMeaning(ex) && <div className="mt-0.5 text-[12px] opacity-75">{errorMeaning(ex)}</div>}
+      <div className="mt-1 text-sm">{ex.explain}</div>
       {ex.python && (
         <div className="mt-1.5 rounded-md bg-stone-900 px-2 py-1 font-mono text-[12px] text-red-200">
-          <div className="text-[10px] uppercase tracking-wider text-stone-400">Python says</div>
+          <div className="text-[10px] uppercase tracking-wider text-stone-400">Python&apos;s exact message</div>
           {ex.python}
         </div>
       )}
@@ -179,7 +180,7 @@ export function ResultCard({ outcome, level, points, onNext, onRetry, nextLabel,
 }) {
   if (outcome.pass) {
     return (
-      <div className="absolute inset-0 z-30 grid place-items-center bg-black/25 p-3 backdrop-blur-[1px]">
+      <div className="fixed inset-0 z-50 grid place-items-center overflow-y-auto bg-black/40 p-3 backdrop-blur-[1px] sm:absolute sm:z-30 sm:bg-black/25">
         <div className="anim-pop w-full max-w-sm rounded-3xl border-4 border-amber-300 bg-[var(--panel)] p-5 text-center shadow-2xl" role="dialog" aria-label="Dish perfect">
           <div className="text-2xl">✨ 🎉 ✨</div>
           <div className="mt-1 font-display text-3xl font-bold tracking-wide" style={{ color: "var(--accent)" }}>DISH PERFECT!</div>
@@ -193,7 +194,7 @@ export function ResultCard({ outcome, level, points, onNext, onRetry, nextLabel,
     );
   }
   return (
-    <div className="absolute inset-0 z-30 grid place-items-center bg-black/25 p-3 backdrop-blur-[1px]">
+    <div className="fixed inset-0 z-50 grid place-items-center overflow-y-auto bg-black/40 p-3 backdrop-blur-[1px] sm:absolute sm:z-30 sm:bg-black/25">
       <div className="anim-pop w-full max-w-md rounded-3xl border-4 border-stone-300 bg-[var(--panel)] p-5 text-center shadow-2xl" role="dialog" aria-label="Not quite">
         <div className="font-display text-2xl font-bold">Not quite! 🍵</div>
         {outcome.accident && <div className="mt-1 font-mono text-xs text-red-600 dark:text-red-300">{outcome.accident.emoji} {outcome.accident.title}</div>}
@@ -202,7 +203,7 @@ export function ResultCard({ outcome, level, points, onNext, onRetry, nextLabel,
         <button className="btn btn-primary mt-4 w-full justify-center text-base" onClick={onRetry} autoFocus>
           <RotateCcw className="h-4 w-4" /> Try Again
         </button>
-        <div className="mt-2 text-[11px] opacity-60">Your recipe stays in the editor. Failed attempts never cost points.</div>
+        <div className="mt-2 text-[11px] opacity-60">Your code is still there. Trying again never costs points.</div>
       </div>
     </div>
   );
@@ -226,7 +227,7 @@ export function CustomerStrip({ customers, extras, selected, onSelect, label }: 
       ))}
       {extras.map((x) => (
         <span key={x.label} className="rounded-full border-2 px-2.5 py-0.5 text-[12.5px] font-bold" style={{ borderColor: x.pass ? "var(--good)" : "var(--bad)" }}>
-          🧪 {x.label} {x.pass ? "✅" : "❌"}
+          🧪 {x.label.replace("Secret taste tests", "Hidden tests")} {x.pass ? "✅" : "❌"}
         </span>
       ))}
     </div>
@@ -238,14 +239,14 @@ export function CustomerStrip({ customers, extras, selected, onSelect, label }: 
 export function HintPanel({ hints, used, onReveal, points }: { hints: string[]; used: number; onReveal: () => void; points: number }) {
   return (
     <div className="panel p-3">
-      <div className="flex items-center gap-2">
+      <div className="flex flex-wrap items-center gap-2">
         <Byte size={40} talking={used > 0} />
-        <div className="flex-1">
+        <div className="min-w-[180px] flex-1">
           <div className="font-display font-semibold">Byte&apos;s hints</div>
-          <div className="text-xs opacity-70">Each hint costs 10% of this level&apos;s points. Worth now: <b>{points} pts</b></div>
+          <div className="text-xs opacity-70">Stuck? Byte gives a clue (not the answer). Each clue costs 10% of this level&apos;s points. This level is worth <b>{points} pts</b> now.</div>
         </div>
-        <button className="btn" onClick={onReveal} disabled={used >= hints.length} title="Ask Byte for a hint">
-          <Lightbulb className="h-4 w-4" /> {used >= hints.length ? "No more hints" : `Ask Byte (${used}/${hints.length})`}
+        <button className="btn w-full justify-center sm:w-auto" onClick={onReveal} disabled={used >= hints.length} title="Ask Byte for a hint">
+          <Lightbulb className="h-4 w-4" /> {used >= hints.length ? "No more hints" : `Ask Byte for a hint (${used}/${hints.length})`}
         </button>
       </div>
       {used > 0 && (

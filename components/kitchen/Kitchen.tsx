@@ -68,13 +68,13 @@ export default function Kitchen(p: KitchenProps) {
   return (
     <div className="panel relative overflow-hidden" style={{ ["--accent" as string]: chapter.accent }}>
       {/* room */}
-      <div className="kitchen-wall relative h-[250px] sm:h-[285px]">
+      <div className="kitchen-wall relative h-[250px] overflow-hidden sm:h-[285px]">
         <div className="kitchen-tiles absolute inset-x-0 top-[38%] bottom-[30%] opacity-70" />
         {/* hanging sign */}
         <div className="absolute left-1/2 top-0 hidden -translate-x-1/2 sm:block">
           <div className="mx-auto h-3 w-px bg-stone-500" />
           <div className="rounded-lg border-2 px-3 py-0.5 font-display text-sm font-semibold text-white shadow" style={{ background: chapter.accent, borderColor: "rgba(0,0,0,.2)" }}>
-            {chapter.icon} {chapter.area}
+            {chapter.icon} {chapter.area} · {chapter.plainTitle}
           </div>
         </div>
         {/* window */}
@@ -88,7 +88,7 @@ export default function Kitchen(p: KitchenProps) {
         {/* ticket printer */}
         <div className="absolute right-2 top-2 z-10 flex flex-col items-end sm:right-3 sm:top-3">
           {p.topRight}
-          <div className="mt-1 flex w-[150px] flex-col items-center sm:w-[180px]">
+          <div className="mt-1 flex w-[128px] flex-col items-center sm:w-[180px]">
             <div className="flex h-7 w-full items-center justify-between rounded-md bg-stone-700 px-2 text-[10px] font-bold uppercase tracking-wider text-stone-100 shadow">
               <span>🧾 tickets</span>
               <span className={`h-2 w-2 rounded-full ${p.newPrint ? "bg-green-400" : "bg-stone-500"}`} />
@@ -97,7 +97,7 @@ export default function Kitchen(p: KitchenProps) {
               {lastTickets.map((t, i) => {
                 const isNew = p.newPrint && i === lastTickets.length - 1;
                 return (
-                  <div key={`${p.prints.length - lastTickets.length + i}`} className={`${isNew ? "anim-ticket" : ""} truncate border-x border-b border-stone-300 bg-[#fffef5] px-1.5 py-0.5 font-mono text-[10.5px] text-stone-800 shadow-sm`}
+                  <div key={`${p.prints.length - lastTickets.length + i}`} className={`${isNew ? "anim-ticket" : ""} ${i < lastTickets.length - 1 ? "hidden sm:block" : ""} truncate border-x border-b border-stone-300 bg-[#fffef5] px-1.5 py-0.5 font-mono text-[10.5px] text-stone-800 shadow-sm`}
                     title={t}>{t || " "}</div>
                 );
               })}
@@ -106,9 +106,9 @@ export default function Kitchen(p: KitchenProps) {
         </div>
 
         {/* counter */}
-        <div className="absolute inset-x-0 bottom-0 z-[15] h-[30%]">
-          <div className="counter-top h-[16px]" />
-          <div className="counter-front h-full" />
+        <div className="absolute inset-x-0 bottom-0 z-[15] flex h-[30%] flex-col">
+          <div className="counter-top h-[16px] shrink-0" />
+          <div className="counter-front flex-1" />
         </div>
 
         {/* flames for the fire chapter */}
@@ -132,7 +132,7 @@ export default function Kitchen(p: KitchenProps) {
         {/* Pyu */}
         <div className="absolute bottom-[13%] left-[1%] z-10 sm:left-[2%]">
           {pyuLine && (
-            <div key={String(p.input?.prompt ?? p.accident?.title ?? p.result)} className="absolute -top-10 left-[70%] z-20 whitespace-nowrap sm:-top-8">
+            <div key={String(p.input?.prompt ?? p.accident?.title ?? p.result)} className="absolute -top-12 left-[62%] z-20 w-max max-w-[140px] sm:-top-9 sm:max-w-[240px]">
               <Bubble tone={p.accident ? "warn" : "light"}>{pyuLine}</Bubble>
             </div>
           )}
@@ -179,7 +179,7 @@ export default function Kitchen(p: KitchenProps) {
           ) : (
             <div key={p.customerIndex} className="anim-walkin relative flex flex-col items-center">
               {customerLine && (
-                <div key={String(p.input?.value ?? p.customerMood)} className="absolute -top-9 right-[40%] z-20 whitespace-nowrap">
+                <div key={String(p.input?.value ?? p.customerMood)} className="absolute -top-12 right-[30%] z-20 w-max max-w-[140px] sm:-top-9 sm:max-w-[240px]">
                   <Bubble side="right">{customerLine}</Bubble>
                 </div>
               )}
@@ -191,7 +191,6 @@ export default function Kitchen(p: KitchenProps) {
           )}
         </div>
 
-        {p.overlay}
       </div>
 
       {/* recipe wall + shelf */}
@@ -199,6 +198,7 @@ export default function Kitchen(p: KitchenProps) {
         <RecipeWall vars={p.vars} stack={p.stack} ret={p.ret} />
         <Shelf vars={p.vars} mystery={level.mysteryVars} ghost={ghost} glowNames={condVars} />
       </div>
+      {p.overlay}
     </div>
   );
 }

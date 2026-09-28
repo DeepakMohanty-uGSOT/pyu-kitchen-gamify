@@ -184,6 +184,7 @@ export type Level = {
   concept: string;
   points: number;
   story: string;
+  learn?: string; // a short "new idea" explanation with a generic example (never the answer)
   goal: string; // the order, supports `code` spans and **bold**
   notes?: string[]; // extra clarifications (still never the answer)
   mode?: "code" | "fill" | "reorder";
@@ -214,4 +215,7 @@ export type Chapter = {
   accent: string;
   icon: string;
   blurb: string;
+  plainTitle: string;
+  simple: string;
+  example: string;
 };

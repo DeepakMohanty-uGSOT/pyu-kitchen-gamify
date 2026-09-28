@@ -5,7 +5,7 @@ import { getLevel, LEVELS } from "@/lib/levels";
 import { chapterComplete, clearProgress, defaultProgress, levelAfter, levelUnlocked, loadProgress, saveProgress, type Progress } from "@/lib/progress";
 import { getRunner } from "@/lib/runner";
 import LevelScreen from "./LevelScreen";
-import { Finale, Header, Landing, MapScreen } from "./Screens";
+import { Finale, GuideModal, Header, Landing, MapScreen } from "./Screens";
 
 type Screen = { name: "landing" } | { name: "map" } | { name: "level"; id: string } | { name: "finale" };
 
@@ -28,6 +28,7 @@ export default function GameApp() {
   const [runner, setRunner] = useState({ status: "idle", error: "" });
   const [systemDark, setSystemDark] = useState(() => typeof window !== "undefined" && window.matchMedia("(prefers-color-scheme: dark)").matches);
   const [toast, setToast] = useState<string | null>(null);
+  const [guide, setGuide] = useState(false);
 
   const update = useCallback((fn: (p: Progress) => Progress) => {
     setProgress((prev) => {
@@ -69,6 +70,14 @@ export default function GameApp() {
     return () => window.removeEventListener("popstate", onPop);
   }, []);
 
+  // Show the how-to-play guide automatically the first time a level is opened.
+  useEffect(() => {
+    if (screen.name === "level" && !progress.seenGuide) {
+      setGuide(true);
+      update((p) => ({ ...p, seenGuide: true }));
+    }
+  }, [screen, progress.seenGuide, update]);
+
   // Guard locked levels
   useEffect(() => {
     if (screen.name === "level" && !levelUnlocked(progress, screen.id)) setScreenState({ name: "map" });
@@ -82,8 +91,9 @@ export default function GameApp() {
 
   const header = (
     <Header progress={progress} update={update} dark={dark} onHome={() => setScreen({ name: "map" })}
-      onReset={() => { clearProgress(); const fresh = { ...defaultProgress(), settings: progress.settings }; setProgress(fresh); saveProgress(fresh); setScreen({ name: "map" }); }} />
+      onReset={() => { clearProgress(); const fresh = { ...defaultProgress(), settings: progress.settings }; setProgress(fresh); saveProgress(fresh); setScreen({ name: "map" }); }} onHelp={() => setGuide(true)} />
   );
+  const guideModal = guide ? <GuideModal onClose={() => setGuide(false)} /> : null;
 
   if (screen.name === "level") {
     const level = getLevel(screen.id)!;
@@ -95,14 +105,15 @@ export default function GameApp() {
     const onNext = () => {
       if (isLast) { update((p) => ({ ...p, finished: true })); setScreen({ name: "finale" }); return; }
       if (sameChapter && nextId) { setScreen({ name: "level", id: nextId }); return; }
-      if (chapterComplete(progress, level.chapter)) setToast(`🎉 Chapter ${level.chapter} complete! A new station is open.`);
+      if (chapterComplete(progress, level.chapter)) setToast(`🎉 Chapter ${level.chapter} finished! The next chapter is now open.`);
       setScreen({ name: "map" });
     };
     return (
       <div className="min-h-screen">
         <LevelScreen key={level.id} level={level} progress={progress} update={update} dark={dark}
-          onExit={() => setScreen({ name: "map" })} onNext={onNext} nextLabel={nextLabel} header={header} />
+          onExit={() => setScreen({ name: "map" })} onNext={onNext} nextLabel={nextLabel} header={header} onHelp={() => setGuide(true)} />
         {runner.status === "loading" && <Loader />}
+        {guideModal}
       </div>
     );
   }
@@ -118,6 +129,7 @@ export default function GameApp() {
         <MapScreen progress={progress} onPlay={(id) => setScreen({ name: "level", id })} onFinale={() => setScreen({ name: "finale" })} />
       )}
       {screen.name === "finale" && <Finale progress={progress} update={update} onBack={() => setScreen({ name: "map" })} />}
+      {guideModal}
       {toast && (
         <div className="anim-fadeup fixed bottom-4 left-1/2 z-50 -translate-x-1/2 rounded-2xl bg-stone-900 px-4 py-2 font-semibold text-amber-50 shadow-xl" role="status">{toast}</div>
       )}
@@ -128,7 +140,7 @@ export default function GameApp() {
 function Loader() {
   return (
     <div className="fixed bottom-4 right-4 z-50 rounded-2xl bg-stone-900 px-4 py-2 text-sm font-semibold text-amber-50 shadow-xl" role="status">
-      <span className="anim-flame mr-1 inline-block">🔥</span> Pyu is warming up the stove…
+      <span className="anim-flame mr-1 inline-block">🔥</span> Loading Python…
     </div>
   );
 }

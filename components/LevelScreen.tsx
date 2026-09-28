@@ -1,7 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { ArrowLeft, FastForward, Map as MapIcon, Pause, Play, RotateCcw, SkipForward, Timer } from "lucide-react";
+import { ArrowLeft, FastForward, HelpCircle, Map as MapIcon, Pause, Play, RotateCcw, SkipForward, Timer } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { evaluateLevel, pointsFor, type LevelOutcome } from "@/lib/evaluate";
 import { assembleCode, blankCount, CHAPTERS, levelsOf } from "@/lib/levels";
@@ -32,9 +32,10 @@ type Props = {
   onNext: () => void;
   nextLabel: string;
   header: React.ReactNode;
+  onHelp: () => void;
 };
 
-export default function LevelScreen({ level, progress, update, dark, onExit, onNext, nextLabel, header }: Props) {
+export default function LevelScreen({ level, progress, update, dark, onExit, onNext, nextLabel, header, onHelp }: Props) {
   const chapter = CHAPTERS.find((c) => c.id === level.chapter)!;
   const chLevels = levelsOf(level.chapter);
   const lp = progress.levels[level.id];
@@ -127,7 +128,7 @@ export default function LevelScreen({ level, progress, update, dark, onExit, onN
   // ---- running
   const startRun = useCallback(async (asStep: boolean) => {
     if (level.mode === "fill" && fill.some((f) => !f.trim())) {
-      setNotice("Fill in every blank before cooking.");
+      setNotice("Fill in every empty box before you press Cook.");
       return;
     }
     setNotice(null);
@@ -325,11 +326,11 @@ export default function LevelScreen({ level, progress, update, dark, onExit, onN
           onRetry={() => { setShowResult(false); reset(); }} />
       )}
       {timeUp && (
-        <div className="absolute inset-0 z-40 grid place-items-center bg-black/40 p-3">
+        <div className="fixed inset-0 z-50 grid place-items-center bg-black/50 p-3 sm:absolute sm:z-40">
           <div className="anim-pop max-w-sm rounded-3xl border-4 border-red-400 bg-[var(--panel)] p-5 text-center shadow-2xl" role="dialog">
             <div className="text-3xl">⏰🚒</div>
             <div className="font-display text-2xl font-bold">Time&apos;s up!</div>
-            <p className="mt-1 text-sm">The fire brigade arrived to help. Nothing is lost: your code is still here. Take a breath and try again.</p>
+            <p className="mt-1 text-sm">The fire brigade came to help. Nothing is lost, and your code is still here. Take a breath and try again.</p>
             <button className="btn btn-primary mt-3 w-full justify-center" autoFocus onClick={() => { setTimeUp(false); setTimeLeft(level.timer ?? 0); reset(); }}>
               <RotateCcw className="h-4 w-4" /> Restart the timer
             </button>
@@ -345,12 +346,13 @@ export default function LevelScreen({ level, progress, update, dark, onExit, onN
       {/* breadcrumb */}
       <div className="flex flex-wrap items-center gap-2 text-sm">
         <button className="btn py-1" onClick={onExit}><ArrowLeft className="h-4 w-4" /> <MapIcon className="h-4 w-4" /> Map</button>
-        <span className="font-semibold" style={{ color: chapter.accent }}>Ch {chapter.id} · {chapter.title}</span>
+        <span className="font-semibold" style={{ color: chapter.accent }}>Chapter {chapter.id} · {chapter.plainTitle}</span>
         <span className="opacity-60">·</span>
         <span>Level {levelNo}/{chLevels.length}</span>
         <span className="opacity-60">·</span>
         <span className="font-display text-base font-semibold">{level.id} {level.title}</span>
         <span className="rounded-full border px-2 text-xs opacity-80" style={{ borderColor: "var(--line)" }}>{level.concept}</span>
+        <button className="btn py-1 text-xs" onClick={onHelp} title="How to play"><HelpCircle className="h-4 w-4" /> How to play</button>
         <span className="ml-auto flex gap-1" aria-label="Level progress">
           {chLevels.map((l) => (
             <span key={l.id} title={`${l.id} ${l.title}`} className="inline-block h-2.5 w-2.5 rounded-full border"
@@ -385,8 +387,14 @@ export default function LevelScreen({ level, progress, update, dark, onExit, onN
       <div className="panel p-3 sm:p-4" style={{ borderLeft: `6px solid ${chapter.accent}` }}>
         <div className="flex flex-col gap-2 lg:flex-row lg:gap-6">
           <div className="lg:w-[36%]">
-            <div className="text-[11px] font-bold uppercase tracking-wider opacity-60">Story</div>
+            <div className="text-[11px] font-bold uppercase tracking-wider opacity-60">📖 Story</div>
             <p className="text-[14.5px] leading-relaxed opacity-90">{level.story}</p>
+            {level.learn && (
+              <div className="mt-2 rounded-xl border-2 border-dashed px-3 py-2 text-[14px]" style={{ borderColor: "color-mix(in srgb, #0ea5e9 55%, var(--line))", background: "color-mix(in srgb, #0ea5e9 8%, var(--panel))" }}>
+                <div className="mb-1 text-[11px] font-bold uppercase tracking-wider text-sky-700 dark:text-sky-300">💡 New idea</div>
+                <RichText text={level.learn} className="leading-relaxed" />
+              </div>
+            )}
             {level.alarm && (
               <div className="mt-2 rounded-lg border-2 border-red-500 bg-red-500/10 px-2 py-1.5 font-mono text-[12.5px] text-red-800 dark:text-red-200">
                 🚨 <b>ALARM:</b> {level.alarm}
@@ -394,7 +402,7 @@ export default function LevelScreen({ level, progress, update, dark, onExit, onN
             )}
           </div>
           <div className="flex-1">
-            <div className="text-[11px] font-bold uppercase tracking-wider" style={{ color: chapter.accent }}>Order</div>
+            <div className="text-[11px] font-bold uppercase tracking-wider" style={{ color: chapter.accent }}>🎯 Your task</div>
             <RichText text={level.goal} className="text-[15px] leading-relaxed" />
             {level.picture && (
               <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-4">
@@ -414,8 +422,8 @@ export default function LevelScreen({ level, progress, update, dark, onExit, onN
             {level.customers.length > 1 && (
               <div className="mt-2 text-[12.5px] opacity-70">
                 {level.runLabel === "Day"
-                  ? `Pyu will test your recipe on ${level.customers.length} different days${level.customers.some((c) => c.hidden) ? " (some are secret)" : ""}.`
-                  : `${level.customers.length} customers will be served${level.customers.some((c) => c.hidden) ? ", some of them secret" : ""}. Your recipe must work for every one.`}
+                  ? `👥 Pyu will test your code on ${level.customers.length} different days${level.customers.some((c) => c.hidden) ? " (some are hidden)" : ""}, so it must work for any values, not just the example.`
+                  : `👥 ${level.customers.length} customers will come${level.customers.some((c) => c.hidden) ? " (some are hidden)" : ""}, each with different answers. Your code must work for every one of them.`}
               </div>
             )}
           </div>
@@ -426,8 +434,8 @@ export default function LevelScreen({ level, progress, update, dark, onExit, onN
       <div className="grid gap-3 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)]">
         <div className="panel flex flex-col gap-2 p-3">
           <div className="flex items-center justify-between">
-            <div className="font-display text-lg font-semibold">📜 Recipe <span className="text-xs font-normal opacity-60">(real Python)</span></div>
-            <button className="text-xs underline opacity-60 hover:opacity-100" onClick={restoreStarter}>restore original</button>
+            <div className="font-display text-lg font-semibold">✍️ Your code <span className="text-xs font-normal opacity-60">(Pyu calls it a recipe)</span></div>
+            <button className="text-xs underline opacity-60 hover:opacity-100" onClick={restoreStarter}>start over</button>
           </div>
           {level.mode === "fill" ? (
             <FillEditor template={level.fillTemplate || ""} values={fill} onChange={setFill} execLine={execLine} errorLine={errorLine} onCook={cook} />
@@ -437,17 +445,17 @@ export default function LevelScreen({ level, progress, update, dark, onExit, onN
             <CodeEditor value={code} onChange={setCode} execLine={execLine} errorLine={errorLine} errorMessage={accident?.python} dark={dark} onCook={cook} onStep={step} />
           )}
           {notice && <div className="rounded-lg bg-amber-500/15 px-2 py-1 text-sm">✋ {notice}</div>}
-          {stale && <div className="text-xs opacity-70">✏️ You changed the recipe. Press Cook to run the new version.</div>}
+          {stale && <div className="text-xs opacity-70">✏️ You changed your code. Press Cook to run the new version.</div>}
           <div className="flex flex-wrap items-center gap-2">
-            <button className="btn btn-primary text-base" onClick={cook} disabled={busy || timeUp} title="Cook (Ctrl/Cmd + Enter)">
-              {playing ? <><Pause className="h-4 w-4" /> Pause</> : phase === "paused" && !edited ? <><Play className="h-4 w-4" /> Continue</> : <><Play className="h-4 w-4" /> {busy ? "Cooking…" : "Cook"}</>}
+            <button className="btn btn-primary text-base" onClick={cook} disabled={busy || timeUp} title="Run your code (Ctrl/Cmd + Enter)">
+              {playing ? <><Pause className="h-4 w-4" /> Pause</> : phase === "paused" && !edited ? <><Play className="h-4 w-4" /> Continue</> : <><Play className="h-4 w-4" /> {busy ? "Cooking…" : "Cook (run)"}</>}
             </button>
-            <button className="btn" onClick={step} disabled={busy || timeUp} title="Step one event (F10)"><SkipForward className="h-4 w-4" /> Step</button>
-            <button className="btn" onClick={reset} disabled={busy} title="Reset the kitchen (keeps your code)"><RotateCcw className="h-4 w-4" /> Reset</button>
+            <button className="btn" onClick={step} disabled={busy || timeUp} title="Run one step at a time (F10)"><SkipForward className="h-4 w-4" /> Step</button>
+            <button className="btn" onClick={reset} disabled={busy} title="Clear the kitchen. Your code stays."><RotateCcw className="h-4 w-4" /> Reset</button>
             {(playing || phase === "paused" || phase === "reacting") && (
-              <button className="btn" onClick={skip} title="Skip to the result"><FastForward className="h-4 w-4" /> Skip</button>
+              <button className="btn" onClick={skip} title="Jump straight to the result"><FastForward className="h-4 w-4" /> Skip</button>
             )}
-            <span className="ml-auto hidden text-[11px] opacity-60 sm:inline"><span className="kbd">Ctrl</span>+<span className="kbd">Enter</span> cook · <span className="kbd">F10</span> step</span>
+            <span className="ml-auto hidden text-[11px] opacity-60 sm:inline">shortcuts: <span className="kbd">Ctrl</span>+<span className="kbd">Enter</span> run · <span className="kbd">F10</span> step</span>
           </div>
           {outcome && outcome.customers.length > 0 && (
             <CustomerStrip customers={outcome.customers} extras={outcome.extras} selected={cust} onSelect={replay} label={runLabel} />
@@ -457,7 +465,7 @@ export default function LevelScreen({ level, progress, update, dark, onExit, onN
         <div className="flex flex-col gap-3">
           <div className="panel flex flex-1 flex-col p-3">
             <div className="mb-2 flex items-center justify-between">
-              <div className="font-display text-lg font-semibold">👀 Execution</div>
+              <div className="font-display text-lg font-semibold">👀 What&apos;s happening</div>
               <div className="flex items-center gap-1 text-xs" role="group" aria-label="Animation speed">
                 <span className="opacity-60">Speed</span>
                 {[0.5, 1, 2].map((s) => (

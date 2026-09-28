@@ -168,3 +168,24 @@ export function explainStop(reason: StopReason, opts: { inputs?: number; name?: 
         explain: "Pyu was cooking for so long that the stove switched itself off. Is something taking forever, like a loop that never ends?" };
   }
 }
+
+const MEANINGS: Record<string, string> = {
+  SyntaxError: "SyntaxError means the code isn't written the way Python expects (like a spelling or grammar mistake).",
+  IndentationError: "IndentationError means the spaces at the start of a line are wrong.",
+  TabError: "TabError means tabs and spaces are mixed at the start of a line.",
+  NameError: "NameError means Python can't find something with that name. Often it's a typo.",
+  UnboundLocalError: "This means a jar was used before anything was put in it.",
+  TypeError: "TypeError means two kinds of values were mixed that don't go together.",
+  ValueError: "ValueError means a value couldn't be changed into the kind you asked for.",
+  ZeroDivisionError: "ZeroDivisionError means something was divided by zero.",
+  IndexError: "IndexError means you asked for a position in a list that doesn't exist.",
+  KeyError: "KeyError means a label wasn't found in a dictionary.",
+  RecursionError: "RecursionError means a function kept calling itself forever.",
+  AttributeError: "AttributeError means you used a tool that this kind of value doesn't have.",
+};
+
+/** A one-line, plain-language meaning of the error type (for beginners). */
+export function errorMeaning(ex: Explained): string | null {
+  const type = ex.python?.split(":")[0] ?? "";
+  return MEANINGS[type] ?? null;
+}

@@ -22,6 +22,7 @@ export type Progress = {
   settings: Settings;
   chefName?: string;
   finished?: boolean;
+  seenGuide?: boolean;
 };
 
 const KEY = "pyus-kitchen-progress-v1";

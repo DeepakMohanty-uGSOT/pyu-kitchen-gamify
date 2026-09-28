@@ -356,7 +356,7 @@ export function evaluateLevel(level: Level, result: LevelRunResult, code: string
     let msg: string | null = null;
     if (c.type === "maxLines") {
       const n = result.ast?.lines ?? 0;
-      if (n > c.n) msg = c.fail ?? `Your recipe is ${n} lines long. Pyu's tired arm can only manage ${c.n} lines or fewer.`;
+      if (n > c.n) msg = c.fail ?? `Your code is ${n} lines long. Pyu's tired arm can only manage ${c.n} lines or fewer (empty lines and # notes don't count).`;
       outcome.extras.push({ label: `${Math.min(n, 99)} / ${c.n} lines`, pass: !msg });
     } else if (c.type === "defines") {
       if (!(result.ast?.functions || []).includes(c.fn)) msg = c.fail ?? `Pyu can't find a recipe card called ${c.fn}. Check the name on your def line.`;

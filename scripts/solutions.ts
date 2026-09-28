@@ -58,7 +58,7 @@ export const MISTAKES: { id: string; work: Work; expect: string }[] = [
   { id: "1.4", work: { fill: ["8"] }, expect: "Day 2" },
   { id: "1.5", work: { order: [1, 0, 3, 4, 2] }, expect: "cold tea" },
   { id: "1.5", work: { order: [0, 1, 2, 3, 4] }, expect: "kettle" },
-  { id: "2.3", work: { code: `eggs = "5"\nmore_eggs = 3\ntotal_eggs = eggs + str(more_eggs)\nprint("Total eggs:", total_eggs)\n` }, expect: "still holds the text" },
+  { id: "2.3", work: { code: `eggs = "5"\nmore_eggs = 3\ntotal_eggs = eggs + str(more_eggs)\nprint("Total eggs:", total_eggs)\n` }, expect: "still has" },
   { id: "3.1", work: { code: `total = flour + sugar + butter\nextra_flour = flour - butter\nper_cake = total // 4\ntriple_sugar = sugar * 3\n` }, expect: "Day 3" },
   { id: "4.4", work: { code: `price = 80\nplates = input()\nprint("Bill:", price * plates)\n` }, expect: "Asha ordered 3 plates" },
   { id: "4.4", work: { code: `plates = input()\nplates2 = input()\n` }, expect: "twice" },

@@ -2,54 +2,55 @@
 
 import type { SafeValue, StackFrame, VarMap } from "@/lib/types";
 
-const TYPE_COLORS: Record<string, string> = {
-  int: "#f59e0b",
-  float: "#06b6d4",
-  str: "#a855f7",
-  bool: "#22c55e",
-  list: "#ec4899",
-  tuple: "#ec4899",
-  dict: "#6366f1",
-  NoneType: "#94a3b8",
+export const TYPE_INFO: Record<string, { color: string; plain: string }> = {
+  int: { color: "#f59e0b", plain: "whole number" },
+  float: { color: "#06b6d4", plain: "decimal number" },
+  str: { color: "#a855f7", plain: "text" },
+  bool: { color: "#22c55e", plain: "True / False" },
+  list: { color: "#ec4899", plain: "list" },
+  tuple: { color: "#ec4899", plain: "tuple" },
+  dict: { color: "#6366f1", plain: "dictionary" },
+  NoneType: { color: "#94a3b8", plain: "nothing" },
 };
+const colorOf = (t: string) => TYPE_INFO[t]?.color ?? "#64748b";
 
-function JarBody({ sv, small }: { sv: SafeValue; small?: boolean }) {
-  const h = small ? 34 : 50;
+/** What you can see through the glass. */
+function Contents({ sv, small }: { sv: SafeValue; small?: boolean }) {
+  const c = colorOf(sv.t);
+  const valueText = (s: string) => (
+    <span className="relative z-10 rounded px-1 font-mono font-bold leading-tight" style={{ fontSize: small ? 11 : 14, color: "var(--ink)", background: "color-mix(in srgb, var(--panel) 70%, transparent)" }}>
+      {s.length > 9 ? s.slice(0, 8) + "…" : s}
+    </span>
+  );
   if (sv.t === "int") {
-    const n = typeof sv.v === "number" ? Math.max(0, Math.min(12, Math.round(sv.v))) : 0;
+    const n = typeof sv.v === "number" ? Math.max(0, Math.min(15, Math.round(sv.v))) : 0;
     return (
-      <div className="relative flex h-full w-full flex-col items-center justify-end">
-        <div className="flex flex-wrap-reverse justify-center gap-[2px] px-1 pb-1" style={{ maxHeight: h - 16 }}>
+      <div className="relative flex h-full w-full flex-col items-center justify-between py-1">
+        {valueText(sv.r)}
+        <div className="flex flex-wrap-reverse justify-center gap-[2px] px-1.5">
           {Array.from({ length: n }).map((_, i) => (
-            <span key={i} className="block rounded-full" style={{ width: small ? 4 : 6, height: small ? 4 : 6, background: "#fbbf24", boxShadow: "inset -1px -1px 0 rgba(0,0,0,.25)" }} />
+            <span key={i} className="block rounded-full" style={{ width: small ? 5 : 8, height: small ? 5 : 8, background: `radial-gradient(circle at 35% 35%, #fde68a, ${c})`, boxShadow: "0 1px 1px rgba(0,0,0,.25)" }} />
           ))}
         </div>
-        <span className="absolute inset-x-0 top-0.5 text-center font-mono font-bold text-amber-900 dark:text-amber-200" style={{ fontSize: small ? 11 : 14 }}>
-          {sv.r.length > 9 ? sv.r.slice(0, 8) + "…" : sv.r}
-        </span>
       </div>
     );
   }
   if (sv.t === "float") {
     const v = typeof sv.v === "number" ? sv.v : 0;
-    const lvl = Math.max(0.12, Math.min(1, Math.abs(v) / 5));
+    const lvl = Math.max(0.15, Math.min(0.92, Math.abs(v) / 5));
     return (
-      <div className="relative h-full w-full">
-        <div className="absolute inset-x-0 bottom-0 smooth" style={{ height: `${lvl * 100}%`, background: "linear-gradient(180deg,#67e8f9,#0891b2)", opacity: 0.75 }} />
-        {[0.25, 0.5, 0.75].map((m) => (
-          <span key={m} className="absolute right-0 h-px w-2 bg-cyan-900/60" style={{ bottom: `${m * 100}%` }} />
-        ))}
-        <span className="absolute inset-x-0 top-0.5 text-center font-mono font-bold text-cyan-950 dark:text-cyan-100" style={{ fontSize: small ? 11 : 13 }}>
-          {sv.r.length > 9 ? sv.r.slice(0, 8) + "…" : sv.r}
-        </span>
+      <div className="relative flex h-full w-full items-start justify-center pt-1">
+        <div className="absolute inset-x-0 bottom-0 smooth" style={{ height: `${lvl * 100}%`, background: `linear-gradient(180deg, color-mix(in srgb, ${c} 55%, white), ${c})`, opacity: 0.7 }} />
+        {[0.25, 0.5, 0.75].map((m) => <span key={m} className="absolute right-1 h-px w-2 bg-slate-500/60" style={{ bottom: `${m * 100}%` }} />)}
+        {valueText(sv.r)}
       </div>
     );
   }
   if (sv.t === "str") {
     const s = String(sv.v ?? "");
     return (
-      <div className="flex h-full w-full items-center justify-center px-0.5">
-        <span className="max-w-full rotate-[-3deg] rounded-sm border border-amber-700/40 bg-[#fffbeb] px-1 text-center font-hand font-bold leading-none text-amber-900 shadow-sm"
+      <div className="flex h-full w-full items-center justify-center px-1">
+        <span className="max-w-full -rotate-3 rounded-sm border border-amber-700/40 bg-[#fffbeb] px-1 text-center font-hand font-bold leading-none text-amber-900 shadow"
           style={{ fontSize: small ? 12 : s.length > 10 ? 13 : 16, wordBreak: "break-word" }}>
           &ldquo;{s.length > 18 ? s.slice(0, 17) + "…" : s}&rdquo;
         </span>
@@ -60,85 +61,101 @@ function JarBody({ sv, small }: { sv: SafeValue; small?: boolean }) {
     const on = sv.v === true;
     return (
       <div className="flex h-full w-full flex-col items-center justify-center gap-0.5">
-        <span className="grid place-items-center rounded-full border-2 text-[10px] font-black text-white"
-          style={{ width: small ? 14 : 20, height: small ? 14 : 20, background: on ? "#22c55e" : "#6b7280", borderColor: on ? "#15803d" : "#4b5563", boxShadow: on ? "0 0 12px 3px rgba(34,197,94,.7)" : "none" }}>
+        <span className="grid place-items-center rounded-full border-2 font-black text-white"
+          style={{ width: small ? 15 : 22, height: small ? 15 : 22, fontSize: small ? 9 : 12, background: on ? "#22c55e" : "#6b7280", borderColor: on ? "#15803d" : "#4b5563", boxShadow: on ? "0 0 14px 4px rgba(34,197,94,.65)" : "none" }}>
           {on ? "✓" : "✗"}
         </span>
-        <span className="font-mono font-bold" style={{ fontSize: small ? 10 : 12 }}>{sv.r}</span>
+        <span className="font-mono font-bold" style={{ fontSize: small ? 10 : 12, color: "var(--ink)" }}>{sv.r}</span>
       </div>
     );
   }
-  if (sv.t === "NoneType") return <div className="grid h-full w-full place-items-center font-mono text-xs opacity-70">None</div>;
-  return <div className="grid h-full w-full place-items-center px-1 text-center font-mono text-[10px] leading-tight break-all">{sv.r.slice(0, 30)}</div>;
+  if (sv.t === "NoneType") return <div className="grid h-full w-full place-items-center font-mono text-xs opacity-70">empty</div>;
+  return <div className="grid h-full w-full place-items-center px-1 text-center font-mono text-[10px] leading-tight break-all" style={{ color: "var(--ink)" }}>{sv.r.slice(0, 30)}</div>;
 }
 
-export function Jar({ name, sv, mystery, small, glow }: { name: string; sv: SafeValue; mystery?: boolean; small?: boolean; glow?: boolean }) {
-  const isList = sv.t === "list" || sv.t === "tuple";
-  const color = mystery ? "#8b5cf6" : TYPE_COLORS[sv.t] ?? "#64748b";
-  const w = small ? 58 : 84;
-  const h = small ? 40 : 58;
-  if (isList && !mystery) {
-    const list = (sv.v || []) as SafeValue[];
-    return (
-      <div className={`anim-pop flex shrink-0 flex-col items-center ${glow ? "anim-glow rounded-xl" : ""}`} title={`${name} = ${sv.r}`}>
-        <div className="mb-0.5 max-w-[180px] truncate rounded bg-stone-800 px-1.5 text-[11px] font-bold text-amber-50">{name}</div>
-        <div key={sv.r} className="anim-refill flex min-h-[42px] min-w-[64px] max-w-[240px] flex-wrap items-center gap-1 rounded-lg border-2 p-1"
-          style={{ borderColor: color, background: "color-mix(in srgb, " + color + " 12%, var(--panel))" }}>
-          {list.length === 0 && <span className="px-1 font-mono text-[11px] opacity-60">empty</span>}
-          {list.slice(0, 8).map((it, i) => (
-            <span key={i} className="rounded border border-black/10 bg-white/85 px-1 font-mono text-[10px] text-stone-800 shadow-sm">
-              {it.t === "str" ? String(it.v).slice(0, 8) : it.r.slice(0, 8)}
-            </span>
-          ))}
-          {(sv.n ?? 0) > 8 && <span className="font-mono text-[10px] opacity-70">+{(sv.n ?? 0) - 8}</span>}
-        </div>
-        <TypeChip t={sv.t} color={color} small={small} />
-      </div>
-    );
-  }
+function NameTag({ name, small, danger }: { name: string; small?: boolean; danger?: boolean }) {
   return (
-    <div className={`anim-pop flex shrink-0 flex-col items-center ${glow ? "anim-glow rounded-xl" : ""}`} style={{ width: w }} title={mystery ? `${name} = ?` : `${name} = ${sv.r}`}>
-      <div className="relative z-10 -mb-1 w-[86%] truncate rounded-t-md rounded-b-sm bg-stone-800 px-1 text-center text-[11px] font-bold text-amber-50 shadow" style={{ fontSize: small ? 9.5 : 11 }}>
-        {name}
-      </div>
-      <div key={mystery ? "m" : sv.t} className="anim-morph relative w-full overflow-hidden rounded-b-2xl rounded-t-lg border-2"
-        style={{ height: h, borderColor: color, background: "color-mix(in srgb, " + color + " 14%, rgba(255,255,255,.55))", boxShadow: "inset 6px 0 0 rgba(255,255,255,.35)" }}>
-        {mystery ? (
-          <div className="grid h-full w-full place-items-center font-display text-2xl font-bold text-violet-700 dark:text-violet-300">?</div>
-        ) : (
-          <div key={sv.r} className="anim-refill h-full w-full"><JarBody sv={sv} small={small} /></div>
-        )}
-      </div>
-      <TypeChip t={mystery ? "?" : sv.t} color={color} small={small} />
+    <div className={`relative z-10 mb-0.5 max-w-full truncate rounded-md border px-1.5 text-center font-mono font-bold shadow-sm ${danger ? "border-dashed border-red-500 bg-red-100 text-red-700" : "border-amber-800/30 bg-[#fffbeb] text-stone-800"}`}
+      style={{ fontSize: small ? 9.5 : 11.5, lineHeight: small ? "14px" : "17px" }} title={name}>
+      {name}
     </div>
   );
 }
 
-function TypeChip({ t, color, small }: { t: string; color: string; small?: boolean }) {
+function TypeChip({ t, small }: { t: string; small?: boolean }) {
+  const info = TYPE_INFO[t];
   return (
-    <span className="mt-0.5 rounded-full px-1.5 font-mono font-bold text-white" style={{ background: color, fontSize: small ? 8.5 : 10 }}>
+    <span className="mt-1 whitespace-nowrap rounded-full px-1.5 font-mono font-bold text-white" style={{ background: t === "?" ? "#8b5cf6" : colorOf(t), fontSize: small ? 8.5 : 10 }}
+      title={info ? `${t} = ${info.plain}` : undefined}>
       {t === "NoneType" ? "None" : t}
     </span>
   );
 }
 
+/** A glass jar. The label is the variable's name; you see its value through the glass. */
+export function Jar({ name, sv, mystery, small, glow }: { name: string; sv: SafeValue; mystery?: boolean; small?: boolean; glow?: boolean }) {
+  const isList = (sv.t === "list" || sv.t === "tuple") && !mystery;
+  const c = mystery ? "#8b5cf6" : colorOf(sv.t);
+  const w = small ? 60 : 88;
+  const h = small ? 40 : 62;
+  if (isList) {
+    const list = (sv.v || []) as SafeValue[];
+    return (
+      <div className={`anim-pop flex shrink-0 flex-col items-center ${glow ? "anim-glow rounded-xl" : ""}`} title={`${name} = ${sv.r}`}>
+        <NameTag name={name} small={small} />
+        <div key={sv.r} className="anim-refill glass relative flex min-h-[46px] min-w-[70px] max-w-[250px] flex-wrap items-center gap-1 rounded-xl border-2 p-1.5">
+          {list.length === 0 && <span className="px-1 font-mono text-[11px] opacity-60">empty list</span>}
+          {list.slice(0, 8).map((it, i) => (
+            <span key={i} className="rounded border border-black/10 bg-white/90 px-1 font-mono text-[10.5px] text-stone-800 shadow-sm">
+              {it.t === "str" ? String(it.v).slice(0, 9) : it.r.slice(0, 9)}
+            </span>
+          ))}
+          {(sv.n ?? 0) > 8 && <span className="font-mono text-[10px] opacity-70">+{(sv.n ?? 0) - 8}</span>}
+        </div>
+        <TypeChip t={sv.t} small={small} />
+      </div>
+    );
+  }
+  return (
+    <div className={`anim-pop flex shrink-0 flex-col items-center ${glow ? "anim-glow rounded-xl" : ""}`} style={{ width: w }} title={mystery ? `${name} = ?` : `${name} = ${sv.r}`}>
+      <NameTag name={name} small={small} />
+      {/* lid */}
+      <div className="w-[76%] rounded-t-md" style={{ height: small ? 6 : 9, background: `repeating-linear-gradient(90deg, rgba(0,0,0,.18) 0 2px, transparent 2px 6px), linear-gradient(180deg, color-mix(in srgb, ${c} 55%, white), color-mix(in srgb, ${c} 75%, black))` }} />
+      {/* neck */}
+      <div className="glass w-[68%] border-x-2" style={{ height: small ? 3 : 4 }} />
+      {/* glass body */}
+      <div key={mystery ? "m" : sv.t} className="anim-morph glass relative w-full overflow-hidden rounded-b-[18px] rounded-t-[10px] border-2" style={{ height: h }}>
+        <span className="pointer-events-none absolute left-[9%] top-[10%] h-[72%] w-[9%] rounded-full bg-white/55" />
+        <span className="pointer-events-none absolute right-[12%] top-[14%] h-[22%] w-[5%] rounded-full bg-white/40" />
+        {mystery ? (
+          <div className="grid h-full w-full place-items-center font-display text-2xl font-bold text-violet-600 dark:text-violet-300">?</div>
+        ) : (
+          <div key={sv.r} className="anim-refill h-full w-full"><Contents sv={sv} small={small} /></div>
+        )}
+      </div>
+      <TypeChip t={mystery ? "?" : sv.t} small={small} />
+    </div>
+  );
+}
+
 function GhostJar({ name }: { name: string }) {
   return (
-    <div className="anim-pop flex w-[84px] shrink-0 flex-col items-center" title={`No jar called ${name}`}>
-      <div className="-mb-1 w-[86%] truncate rounded-t-md border border-dashed border-red-500 bg-red-100 px-1 text-center text-[11px] font-bold text-red-700">{name}</div>
-      <div className="relative grid h-[58px] w-full place-items-center rounded-b-2xl rounded-t-lg border-2 border-dashed border-red-500 bg-red-500/5 text-2xl">🔍</div>
-      <span className="mt-0.5 rounded-full bg-red-600 px-1.5 font-mono text-[10px] font-bold text-white">missing</span>
+    <div className="anim-pop flex w-[88px] shrink-0 flex-col items-center" title={`There is no jar called ${name}`}>
+      <NameTag name={name} danger />
+      <div className="relative grid h-[75px] w-full place-items-center rounded-b-[18px] rounded-t-[10px] border-2 border-dashed border-red-500 bg-red-500/5 text-2xl">🔍</div>
+      <span className="mt-1 rounded-full bg-red-600 px-1.5 font-mono text-[10px] font-bold text-white">not found</span>
     </div>
   );
 }
 
 export function Shelf({ vars, mystery = [], ghost, glowNames = [] }: { vars: VarMap; mystery?: string[]; ghost?: string | null; glowNames?: string[] }) {
   const entries = Object.entries(vars).filter(([, sv]) => sv.t !== "function");
+  const shown = Array.from(new Set(entries.map(([n, sv]) => (mystery.includes(n) ? "" : sv.t)))).filter((t) => t && TYPE_INFO[t]);
   return (
     <div className="relative">
-      <div className="flex min-h-[92px] items-end gap-3 overflow-x-auto px-3 pb-2 pt-2" aria-label="Pantry shelf: your variables">
+      <div className="flex min-h-[112px] items-end gap-3 overflow-x-auto px-3 pb-2 pt-3" aria-label="Shelf: your variables">
         {entries.length === 0 && !ghost && (
-          <div className="pb-4 pl-1 text-sm italic opacity-60">The shelf is empty. Jars appear here as your recipe creates them.</div>
+          <div className="pb-6 pl-1 text-sm italic opacity-70">🫙 Your variables show up here as glass jars when your code makes them.</div>
         )}
         {entries.map(([name, sv]) => (
           <Jar key={name} name={name} sv={sv} mystery={mystery.includes(name)} glow={glowNames.includes(name)} />
@@ -146,6 +163,16 @@ export function Shelf({ vars, mystery = [], ghost, glowNames = [] }: { vars: Var
         {ghost && !vars[ghost] && <GhostJar name={ghost} />}
       </div>
       <div className="shelf-board mx-1 h-3 rounded-sm" />
+      {shown.length > 0 && (
+        <div className="flex flex-wrap gap-x-3 gap-y-0.5 px-3 py-1.5 text-[11px]" style={{ color: "var(--ink-2)" }} aria-label="What the jar colours mean">
+          {shown.map((t) => (
+            <span key={t} className="inline-flex items-center gap-1">
+              <span className="inline-block h-2.5 w-2.5 rounded-full" style={{ background: colorOf(t) }} />
+              <b className="font-mono">{t === "NoneType" ? "None" : t}</b> = {TYPE_INFO[t].plain}
+            </span>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
@@ -154,7 +181,7 @@ export function RecipeWall({ vars, stack, ret }: { vars: VarMap; stack: StackFra
   const cards = Object.entries(vars).filter(([, sv]) => sv.t === "function");
   if (!cards.length) return null;
   return (
-    <div className="flex flex-wrap gap-3 px-3 pt-2" aria-label="Recipe wall: your functions">
+    <div className="flex flex-wrap gap-3 px-3 pt-3" aria-label="Recipe wall: your functions">
       {cards.map(([key, sv]) => {
         const fn = sv.name || key;
         const frames = stack.filter((f) => f.fn === fn);
@@ -163,10 +190,11 @@ export function RecipeWall({ vars, stack, ret }: { vars: VarMap; stack: StackFra
         const isTop = stack.length > 0 && stack[stack.length - 1].fn === fn;
         const returned = ret && ret.fn === fn && !ret.raised;
         return (
-          <div key={key} className={`anim-pop relative min-w-[150px] max-w-[280px] rounded-md border bg-[#fffbeb] px-2.5 pb-2 pt-2.5 text-stone-800 shadow-md transition ${active ? "ring-4 ring-emerald-400/70" : ""}`}
-            style={{ transform: `rotate(${(key.length % 3) - 1}deg)`, borderColor: active ? "#059669" : "#d6d3d1", boxShadow: isTop ? "0 0 22px rgba(16,185,129,.55)" : undefined }}>
+          <div key={key} className={`anim-pop relative min-w-[160px] max-w-full rounded-md border bg-[#fffbeb] px-2.5 pb-2 pt-2.5 text-stone-800 shadow-md transition sm:max-w-[300px] ${active ? "ring-4 ring-emerald-400/70" : ""}`}
+            style={{ borderColor: active ? "#059669" : "#d6d3d1", boxShadow: isTop ? "0 0 22px rgba(16,185,129,.55)" : undefined }}>
             <span className="absolute -top-1.5 left-1/2 h-3 w-3 -translate-x-1/2 rounded-full bg-red-600 shadow" />
-            <div className="font-mono text-[12px] font-bold">
+            <div className="text-[9.5px] font-bold uppercase tracking-wide text-emerald-800">recipe card (function)</div>
+            <div className="break-all font-mono text-[12px] font-bold">
               📜 {fn}(
               {(sv.params || []).map((p, i) => {
                 const pname = p.split("=")[0];
@@ -183,7 +211,7 @@ export function RecipeWall({ vars, stack, ret }: { vars: VarMap; stack: StackFra
             </div>
             {active && top && (
               <div className="mt-1.5 rounded border border-dashed border-emerald-600/50 bg-emerald-50 p-1">
-                <div className="mb-0.5 text-[9px] font-bold uppercase tracking-wide text-emerald-800">card&apos;s own shelf</div>
+                <div className="mb-0.5 text-[9px] font-bold uppercase tracking-wide text-emerald-800">this card&apos;s own shelf (disappears when it finishes)</div>
                 <div className="flex flex-wrap gap-1.5">
                   {Object.entries(top.loc).filter(([, v]) => v.t !== "function").length === 0 && <span className="text-[10px] italic opacity-60">empty</span>}
                   {Object.entries(top.loc).filter(([, v]) => v.t !== "function").map(([n, v]) => (
@@ -193,8 +221,8 @@ export function RecipeWall({ vars, stack, ret }: { vars: VarMap; stack: StackFra
               </div>
             )}
             {returned && (
-              <div key={`${ret!.value?.r}`} className="anim-slideout absolute -right-3 -bottom-3 rounded-full border-2 border-amber-600 bg-amber-100 px-2 py-0.5 font-mono text-[11px] font-bold text-amber-900 shadow">
-                🍽️ returns {ret!.value ? ret!.value.r.slice(0, 18) : "None"}
+              <div key={`${ret!.value?.r}`} className="anim-slideout mt-1 inline-block rounded-full border-2 border-amber-600 bg-amber-100 px-2 py-0.5 font-mono text-[11px] font-bold text-amber-900 shadow">
+                🍽️ gives back {ret!.value ? ret!.value.r.slice(0, 18) : "None"}
               </div>
             )}
           </div>

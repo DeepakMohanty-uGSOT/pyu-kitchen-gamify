@@ -330,9 +330,9 @@ export function Landing({ runner, onStart, onRetry, hasProgress }: { runner: Run
     <button className="btn btn-primary px-8 py-3 text-lg" style={{ ["--accent" as string]: "#d97706" }} onClick={onStart}>{label}</button>
   );
   return (
-    <div className="mx-auto flex max-w-6xl flex-col gap-16 px-1 pb-8 pt-4 sm:px-4 sm:pb-12">
+    <div className="mx-auto flex max-w-6xl flex-col gap-16 px-1 pb-8 pt-2 sm:px-4 sm:pb-12">
       {/* hero */}
-      <section className="relative -mx-2 overflow-hidden rounded-[2rem] px-4 py-10 sm:-mx-4 sm:px-8 sm:py-14 lg:py-16">
+      <section className="relative -mx-2 overflow-hidden rounded-[2rem] px-4 py-8 sm:-mx-4 sm:px-8 sm:py-10 lg:pb-[clamp(1rem,4vh,2.5rem)] lg:pt-[clamp(1rem,4.5vh,2.75rem)]">
         {/* background: warm glow, dotted grid and floating ingredients */}
         <div className="pointer-events-none absolute inset-0 -z-10" aria-hidden>
           <div className="absolute -left-24 -top-24 h-80 w-80 rounded-full bg-amber-500/25 blur-3xl" />
@@ -344,17 +344,17 @@ export function Landing({ runner, onStart, onRetry, hasProgress }: { runner: Run
           ))}
         </div>
 
-        <div className="grid items-center gap-10 lg:grid-cols-[1.05fr_1fr] lg:gap-12">
+        <div className="grid w-full items-center gap-8 lg:grid-cols-[1fr_1fr] lg:gap-10">
           {/* text */}
-          <div className="flex flex-col items-center gap-5 text-center lg:items-start lg:text-left">
+          <div className="flex flex-col items-center gap-4 text-center lg:items-start lg:gap-[clamp(0.6rem,2.6vh,1.75rem)] lg:text-left">
             <span className="anim-fadeup inline-flex items-center gap-2 rounded-full border px-3 py-1 text-[13px] font-semibold shadow-sm" style={{ borderColor: "color-mix(in srgb, #f59e0b 50%, var(--line))", background: "var(--panel)" }}>
               <Logo size={20} /> Game 1 · Python for complete beginners
             </span>
-            <h1 className="anim-fadeup font-display text-[2.6rem] font-bold leading-[1.05] tracking-tight sm:text-6xl lg:text-[4.1rem]" style={{ animationDelay: ".08s" }}>
+            <h1 className="anim-fadeup font-display text-[2.5rem] font-bold leading-[1.05] tracking-tight sm:text-[3.4rem] lg:text-[clamp(2.3rem,min(4.5vw,8.6vh),4.4rem)]" style={{ animationDelay: ".08s" }}>
               Learn Python by{" "}
               <span className="bg-gradient-to-r from-amber-500 via-orange-500 to-rose-500 bg-clip-text text-transparent">cooking with Chef&nbsp;Pyu</span>
             </h1>
-            <p className="anim-fadeup max-w-xl text-[16.5px] leading-relaxed opacity-90" style={{ animationDelay: ".16s" }}>
+            <p className="anim-fadeup max-w-xl text-[16px] leading-relaxed opacity-90 lg:text-[clamp(14.5px,2.3vh,19px)]" style={{ animationDelay: ".16s" }}>
               Pyu the snake chef follows your instructions <b>exactly</b>, just like a computer. Write a few lines of <b>real Python</b>, press <b>Cook</b>, and watch the kitchen bring your code to life.
             </p>
             <div className="anim-fadeup flex flex-col items-center gap-2.5 sm:flex-row" style={{ animationDelay: ".24s" }}>
@@ -362,10 +362,10 @@ export function Landing({ runner, onStart, onRetry, hasProgress }: { runner: Run
               <a href="#how-it-works" className="btn px-5 py-3">👀 See how it works</a>
             </div>
             <div className="anim-fadeup" style={{ animationDelay: ".3s" }}>{status}</div>
-            <div className="anim-fadeup grid w-full max-w-md grid-cols-3 gap-2" style={{ animationDelay: ".36s" }}>
+            <div className="anim-fadeup grid w-full max-w-md grid-cols-3 gap-2 lg:max-w-lg" style={{ animationDelay: ".36s" }}>
               {[["9", "chapters"], [String(LEVELS.length), "short levels"], ["0", "setup needed"]].map(([n, l]) => (
-                <div key={l} className="rounded-2xl border px-2 py-2.5 text-center" style={{ borderColor: "var(--line)", background: "var(--panel)" }}>
-                  <div className="font-display text-2xl font-bold text-amber-600 dark:text-amber-400">{n}</div>
+                <div key={l} className="rounded-2xl border px-2 py-2 text-center lg:py-[clamp(0.35rem,1.6vh,1rem)]" style={{ borderColor: "var(--line)", background: "var(--panel)" }}>
+                  <div className="font-display text-xl font-bold text-amber-600 dark:text-amber-400 lg:text-[clamp(1.1rem,3.6vh,2rem)]">{n}</div>
                   <div className="text-[12px] opacity-75">{l}</div>
                 </div>
               ))}
@@ -373,7 +373,7 @@ export function Landing({ runner, onStart, onRetry, hasProgress }: { runner: Run
           </div>
 
           {/* live demo */}
-          <div className="anim-fadeup pt-8 sm:pt-10 lg:pt-0" style={{ animationDelay: ".2s" }}>
+          <div className="anim-fadeup" style={{ animationDelay: ".2s" }}>
             <HeroDemo />
           </div>
         </div>

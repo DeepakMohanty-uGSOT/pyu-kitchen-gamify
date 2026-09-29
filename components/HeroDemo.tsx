@@ -64,25 +64,23 @@ export default function HeroDemo() {
   const mood = success ? "proud" : running ? "cooking" : "idle";
 
   return (
-    <div className="relative mx-auto w-full max-w-[500px]" aria-label="Animated demo: code is typed, Cook is pressed and the kitchen shows the result" role="img">
-      {/* Byte's hint bubble */}
-      <div className="absolute -right-2 -top-10 z-20 hidden items-end gap-1 sm:flex">
-        <div className="anim-float rounded-2xl rounded-br-sm border bg-white px-3 py-1.5 text-[12.5px] font-bold text-stone-800 shadow-lg" style={{ borderColor: "#bfdbfe" }}>
-          {success ? "You did it! 🎉" : running ? "Watch it run! 👀" : typing ? "Type some Python…" : "Now press Cook!"}
-        </div>
-        <Byte size={46} talking />
-      </div>
+    <div className="relative mx-auto w-full max-w-[500px] lg:max-w-[clamp(440px,66vh,600px)]" aria-label="Animated demo: code is typed, Cook is pressed and the kitchen shows the result" role="img">
 
       <div className="relative overflow-hidden rounded-3xl border-2 shadow-2xl" style={{ borderColor: "color-mix(in srgb, #f59e0b 45%, var(--line))", background: "var(--panel)" }}>
         {/* window bar */}
         <div className="flex items-center gap-1.5 border-b px-3 py-2" style={{ borderColor: "var(--line)", background: "var(--panel-2)" }}>
           <span className="h-3 w-3 rounded-full bg-red-400" /><span className="h-3 w-3 rounded-full bg-amber-400" /><span className="h-3 w-3 rounded-full bg-green-400" />
           <span className="ml-3 rounded-md border px-2 py-0.5 font-mono text-[11px]" style={{ borderColor: "var(--line)" }}>📜 recipe.py</span>
-          <span className="ml-auto text-[11px] font-semibold opacity-70">Level 1.1 · Label the Jars</span>
+          <span className="ml-auto flex items-center gap-1.5">
+            <span key={success ? "s" : running ? "r" : typing ? "t" : "c"} className="anim-bubble whitespace-nowrap rounded-full border bg-white px-2.5 py-0.5 text-[11.5px] font-bold text-stone-800 shadow-sm" style={{ borderColor: "#bfdbfe" }}>
+              {success ? "You did it! 🎉" : running ? "Watch it run! 👀" : typing ? "Type some Python…" : "Now press Cook!"}
+            </span>
+            <Byte size={28} talking />
+          </span>
         </div>
 
         {/* code editor */}
-        <div className="bg-[#1d1611] px-3 py-3 font-mono text-[13.5px] leading-7 text-amber-50 sm:text-[14.5px]">
+        <div className="bg-[#1d1611] px-3 py-2.5 font-mono text-[13.5px] leading-7 text-amber-50 sm:text-[14.5px] lg:py-[clamp(0.3rem,1.4vh,1rem)] lg:text-[clamp(13px,1.9vh,16.5px)] lg:leading-[clamp(1.4rem,3.8vh,2.2rem)]">
           {LINES.map((l, i) => (
             <div key={i} className={`flex rounded-md px-1 transition-colors duration-300 ${execLine === i ? "bg-yellow-400/25" : ""}`}>
               <span className="w-6 shrink-0 select-none text-right text-[12px] text-stone-500">{execLine === i ? "▶" : i + 1}</span>
@@ -107,7 +105,7 @@ export default function HeroDemo() {
         </div>
 
         {/* mini kitchen */}
-        <div className="kitchen-wall relative h-[190px] overflow-hidden sm:h-[205px]">
+        <div className="kitchen-wall relative h-[180px] overflow-hidden sm:h-[200px] lg:h-[clamp(140px,29vh,290px)]">
           <div className="kitchen-tiles absolute inset-x-0 top-[20%] bottom-[34%] opacity-60" />
           <div className="absolute inset-x-0 bottom-0 z-[5] flex h-[34%] flex-col">
             <div className="counter-top h-[10px] shrink-0" /><div className="counter-front flex-1" />
@@ -145,7 +143,7 @@ export default function HeroDemo() {
       </div>
 
       {/* step indicator */}
-      <div className="mt-3 flex items-center justify-center gap-2 text-[12px] font-semibold">
+      <div className="mt-3 flex flex-wrap items-center justify-center gap-2 text-[12px] font-semibold lg:mt-[clamp(0.4rem,1.5vh,0.75rem)]">
         {[["✍️ Write", typing], ["▶ Cook", pressed || (!typing && t < RUN_START)], ["👀 Watch", running], ["🎉 Done", success]].map(([label, on]) => (
           <span key={label as string} className="rounded-full border px-2.5 py-1 transition-all duration-300"
             style={{ borderColor: on ? "#f59e0b" : "var(--line)", background: on ? "color-mix(in srgb, #f59e0b 22%, var(--panel))" : "var(--panel)", transform: on ? "scale(1.08)" : "scale(1)" }}>
